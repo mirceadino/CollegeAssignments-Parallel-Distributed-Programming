@@ -17,7 +17,7 @@ bool OperationsAreDone(vector<deque<Operation>>* operations) {
 void CheckAccount(BankAccount* account, vector<BankAccount>* accounts) {
   account->Lock();
 
-  /* printf("Checking account #%d...\n", account->id()); */
+  printf("Checking account #%d...\n", account->id());
   int balance = account->default_balance();
   for (const Operation& operation : account->logs()) {
     if (operation.source() == operation.destination()) {
@@ -26,50 +26,56 @@ void CheckAccount(BankAccount* account, vector<BankAccount>* accounts) {
 
     if (account->id() == operation.source()) {
       balance -= operation.sum();
-      BankAccount& destination = (*accounts)[operation.destination()];
-      bool found_log = false;
-      for (const Operation& dest_operation : destination.logs()) {
-        if (dest_operation.id() == operation.id()) {
-          found_log = true;
-          break;
+      if (operation.destination() > account->id()) {
+        BankAccount& destination = (*accounts)[operation.destination()];
+        destination.Lock();
+        bool found_log = false;
+        for (const Operation& dest_operation : destination.logs()) {
+          if (dest_operation.id() == operation.id()) {
+            found_log = true;
+            break;
+          }
         }
+        destination.Unlock();
+        assert(found_log);
       }
-      assert(found_log);
     }
 
     if (account->id() == operation.destination()) {
       balance += operation.sum();
-      BankAccount& source = (*accounts)[operation.source()];
-      bool found_log = false;
-      for (const Operation& source_operation : source.logs()) {
-        if (source_operation.id() == operation.id()) {
-          found_log = true;
-          break;
+      if (operation.source() > account->id()) {
+        BankAccount& source = (*accounts)[operation.source()];
+        source.Lock();
+        bool found_log = false;
+        for (const Operation& source_operation : source.logs()) {
+          if (source_operation.id() == operation.id()) {
+            found_log = true;
+            break;
+          }
         }
+        source.Unlock();
+        assert(found_log);
       }
-      assert(found_log);
     }
   }
 
-  /* printf("Account #%d: current balance vs. checked balance: %d vs. %d.\n", */
-  /*        account->id(), account->balance(), */
-  /*        balance); */
-  assert(account->balance() == balance);
-  /* printf("Account #%d successfully checked!\n", account->id()); */
-
+  printf("Account #%d: current balance vs. checked balance: %d vs. %d.\n",
+         account->id(), account->balance(),
+         balance);
   account->Unlock();
 
-  //fflush(stdout);
+  assert(account->balance() == balance);
+  printf("Account #%d successfully checked!\n", account->id());
 }
 
 void CheckConsistency(vector<BankAccount>* accounts) {
-  /* printf("Time for consistency check...\n"); */
+  printf("Time for consistency check...\n");
 
   for (BankAccount& account : *accounts) {
     CheckAccount(&account, accounts);
   }
 
-  /* printf("Consistency check was successful!\n"); */
+  printf("Consistency check was successful!\n");
 }
 
 void PerformConsistencyCheck(vector<BankAccount>* accounts,
@@ -92,7 +98,7 @@ void DoOperation(Operation* operation, BankAccount* source,
     }
   }
 
-  /* printf("Performing operation #%d...\n", operation->id()); */
+  printf("Performing operation #%d...\n", operation->id());
 
   // if (source->balance() >= operation->sum()) {
   source->Substract(operation->sum());
@@ -103,14 +109,12 @@ void DoOperation(Operation* operation, BankAccount* source,
   }
   // }
 
-  /* printf("Operation #%d was performed successfully!\n", operation->id()); */
+  printf("Operation #%d was performed successfully!\n", operation->id());
 
   source->Unlock();
   if (source != destination) {
     destination->Unlock();
   }
-
-  //fflush(stdout);
 }
 
 void PerformOperations(vector<BankAccount>* accounts,
@@ -154,12 +158,12 @@ int main(int argc, char** argv) {
     operation_threads.emplace_back(PerformOperations, &accounts,
                                    &operations[i]);
   }
-  /* thread consistency_thread(PerformConsistencyCheck, &accounts, &operations); */
+  thread consistency_thread(PerformConsistencyCheck, &accounts, &operations);
 
   for (int i = 0; i < kNumThreadsForOperations; ++i) {
     operation_threads[i].join();
   }
-  /* consistency_thread.join(); */
+  consistency_thread.join();
   CheckConsistency(&accounts);
 
 
