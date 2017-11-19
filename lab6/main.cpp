@@ -46,11 +46,9 @@ int main(int argc, char** argv) {
   } else if (method == 2) {
     pol_mul = make_unique<RegularParallelPM<int>>(num_threads);
   } else if (method == 3) {
-    cerr << "This method is unavailable for now. Using method 1." << endl;
-    pol_mul = make_unique<RegularSequentialPM<int>>();
+    pol_mul = make_unique<KaratsubaSequentialPM<int>>();
   } else if (method == 4) {
-    cerr << "This method is unavailable for now. Using method 1." << endl;
-    pol_mul = make_unique<RegularSequentialPM<int>>();
+    pol_mul = make_unique<KaratsubaParallelPM<int>>(num_threads);
   }
 
   Polynomial<int> C = pol_mul->Multiply(A, B);
