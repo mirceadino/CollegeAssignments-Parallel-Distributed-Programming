@@ -22,7 +22,8 @@ int main(int argc, char** argv) {
   if (argc < 3) {
     cerr << "usage: " << argv[0] << " <method> <num_threads>" << endl;
     cerr << "method 1 = regular O(N^2) unparallel" << endl;
-    cerr << "method 2 = regular O(N^2) parallel" << endl;
+    cerr << "method 2 = regular O(N^2) parallel [ <num_threads> is required here ]"
+         << endl;
     cerr << "method 3 = Karatsuba unparallel" << endl;
     cerr << "method 4 = Karatsuba parallel" << endl;
     return 0;
@@ -35,7 +36,6 @@ int main(int argc, char** argv) {
       return 0;
     }
   }
-  cerr << "Using " << num_threads << " threads." << endl;
 
   Polynomial<int> A = ReadPolynomial<int>();
   Polynomial<int> B = ReadPolynomial<int>();
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
   } else if (method == 3) {
     pol_mul = make_unique<KaratsubaSequentialPM<int>>();
   } else if (method == 4) {
-    pol_mul = make_unique<KaratsubaParallelPM<int>>(num_threads);
+    pol_mul = make_unique<KaratsubaParallelPM<int>>();
   }
 
   Polynomial<int> C = pol_mul->Multiply(A, B);
