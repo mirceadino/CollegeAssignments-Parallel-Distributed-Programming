@@ -1,6 +1,6 @@
 CXXFLAGS=-std=c++14 -pthread
 
-all: main generator
+all: main generator bignum
 
 main: main.cpp polynomial.h
 	g++ $(CXXFLAGS) main.cpp -o main
