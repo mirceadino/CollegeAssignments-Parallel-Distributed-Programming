@@ -8,5 +8,8 @@ main: main.cpp polynomial.h
 generator: generator.cpp
 	g++ $(CXXFLAGS) generator.cpp -o generator
 
-clean: main generator
-	rm main generator 
+bignum: bignum.cpp
+	g++ $(CXXFLAGS) bignum.cpp -o bignum
+
+clean: main generator bignum
+	rm main generator bignum
