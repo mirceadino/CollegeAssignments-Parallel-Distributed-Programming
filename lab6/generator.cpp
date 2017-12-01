@@ -8,7 +8,7 @@ int kMinVal;
 int kMaxVal;
 
 int main(int argc, char** argv) {
-  if (argc < 4) {
+  if (argc < 5) {
     fprintf(stderr,
             "usage: %s <n> <m> <min> <max> [<seed>]\n",
             argv[0]);
