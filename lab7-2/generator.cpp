@@ -32,10 +32,10 @@ int main(int argc, char** argv) {
   }
 
   fprintf(stderr, "Seed: %d\n", kSeed);
-  printf("%d %d\n", kN, kM);
+  printf("%d\n", kN);
   for (int i = 0; i < kN; ++i) {
     for (auto& c : nums[i]) {
-      printf("%d ", c);
+      printf("%d", c);
     }
     printf("\n");
   }
