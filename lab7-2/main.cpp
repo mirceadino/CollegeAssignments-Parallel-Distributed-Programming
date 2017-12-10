@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include "addition.h"
+#include "adder.h"
 
 using namespace std;
 
@@ -22,7 +22,7 @@ int main() {
 
   assert(N == 4);
 
-  Addition a1, a2, a3;
+  Adder a1, a2, a3;
 
   for (auto c : numbers[0]) {
     a1.push_left(c);

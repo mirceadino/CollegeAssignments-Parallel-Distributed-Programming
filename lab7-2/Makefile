@@ -2,7 +2,7 @@ CXXFLAGS=-std=c++14 -pthread
 
 all: main generator
 
-main: main.cpp addition.h
+main: main.cpp adder.h
 	g++ $(CXXFLAGS) main.cpp -o main
 
 generator: generator.cpp
