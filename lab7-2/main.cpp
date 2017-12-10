@@ -6,8 +6,10 @@ using namespace std;
 int main() {
   int N;
   cin >> N;
-  vector<vector<int>> numbers;
-  for (int i = 1; i <= N; ++i) {
+  vector<unique_ptr<Queue>> all_terms;
+  deque<Queue*> terms;
+  vector<future<void>> futures;
+  for (int i = 0; i < N; ++i) {
     string number;
     cin >> number;
 
@@ -17,57 +19,40 @@ int main() {
     }
 
     reverse(digits.begin(), digits.end());
-    numbers.push_back(digits);
+    ostringstream name;
+    name << "#" << i << " - " << number;
+    all_terms.push_back(make_unique<Number>(name.str(), digits));
+    terms.push_back(all_terms.back().get());
+    futures.push_back(async(launch::async, [&terms]() {
+      terms.back()->start();
+    }));
   }
 
-  assert(N == 4);
+  while (terms.size() > 1) {
+    Queue* lhs = terms.front();
+    terms.pop_front();
+    Queue* rhs = terms.front();
+    terms.pop_front();
 
-  Adder a1, a2, a3;
+    ostringstream name;
+    name << "#" << futures.size() - N;
+    all_terms.push_back(make_unique<Adder>(name.str(), lhs, rhs));
 
-  for (auto c : numbers[0]) {
-    a1.push_left(c);
+    Adder* adder = (Adder*)all_terms.back().get();
+    terms.push_back(adder);
+    futures.push_back(async(launch::async, [&adder]() {
+      adder->start();
+    }));
   }
-  a1.close_left();
 
-  for (auto c : numbers[1]) {
-    a1.push_right(c);
+  for (int i = 0; i < (int)futures.size(); ++i) {
+    futures[i].wait();
   }
-  a1.close_right();
-
-  for (auto c : numbers[2]) {
-    a2.push_left(c);
-  }
-  a2.close_left();
-
-  for (auto c : numbers[3]) {
-    a2.push_right(c);
-  }
-  a2.close_right();
-
-  future<void> f1 = async(launch::async, [&a1, &a3]() {
-    while (!a1.is_finished()) {
-      a3.push_left(a1.pop());
-    }
-    a3.close_left();
-  });
-
-  future<void> f2 = async(launch::async, [&a2, &a3]() {
-    while (!a2.is_finished()) {
-      a3.push_right(a2.pop());
-    }
-    a3.close_right();
-  });
 
   vector<int> result;
-  future<void> f3 = async(launch::async, [&a3, &result]() {
-    while (!a3.is_finished()) {
-      result.push_back(a3.pop());
-    }
-  });
-
-  f1.wait();
-  f2.wait();
-  f3.wait();
+  while (!terms.back()->is_finished()) {
+    result.push_back(terms.back()->pop());
+  }
 
   reverse(result.begin(), result.end());
   for (int c : result) {
