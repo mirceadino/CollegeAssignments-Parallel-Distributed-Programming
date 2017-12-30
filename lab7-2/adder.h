@@ -105,7 +105,7 @@ class Adder: public Queue {
         int rhs_digit = rhs_->pop();
         fprintf(stderr, "[%s] Right digit is %d\n", name_.c_str(), rhs_digit);
 
-        fprintf(stderr, "[%s] Adding %d with %d\n", name_.c_str(), lhs_digit, rhs_digit);
+        fprintf(stderr, "[%s] Starting adding %d with %d\n", name_.c_str(), lhs_digit, rhs_digit);
 
         int result = lhs_digit + rhs_digit;
         int carry = 0;
